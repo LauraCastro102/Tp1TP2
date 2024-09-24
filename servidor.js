@@ -21,9 +21,9 @@ const servidor = http.createServer((req, res) => {
     // manipulacion de HTTP
     if (req.method === "GET" && parsedUrl.pathname === "/") {
         res.writeHead(200);
-        res.end("Bienvenido a la API de Materias");
-        /* // busca el index cuando la ruta es la ruta es "/"
-        res.setHeader('Content-Type', 'text/html'); */
+        //res.end("Bienvenido a la API de Materias");
+         // busca el index cuando la ruta es la ruta es "/"
+        res.setHeader('Content-Type', 'text/html'); 
         fs.readFile(path.join(__dirname, 'index.html'), (err, data) => {
             if (err) {
                 res.writeHead(500);
@@ -91,6 +91,6 @@ const servidor = http.createServer((req, res) => {
 });
 
 // Escuchar en el puerto 3000
-servidor.listen(3000, () => {
-    console.log('Servidor escuchando en http://localhost:3000');
+servidor.listen(5500, () => {
+    console.log('Servidor escuchando en http://localhost:5500');
 });

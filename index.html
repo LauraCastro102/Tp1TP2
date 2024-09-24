@@ -9,117 +9,122 @@
     <h1>Administración de Materias</h1>
     <form id="materiaForm" onsubmit="return false;">
         <input type="hidden" id="materiaId" />
-        <input type="text" id="nombre" placeholder="Nombre de la materia" required />
-        <input type="number" id="valor" placeholder="Valor" required />
-        <button type="button" id="btnAgregar">Agregar Materia</button><br><br>
-        <button type="button" id="btnActualizar" style="display: none;">Actualizar Materia</button><br><br>
-        <button type="button" id="btnEliminar" style="display: none;" onclick="deleteMateria()">Eliminar Materia</button><br>
+        <input type="text" id="materia" name="materia" placeholder="Nombre de la materia" required />
+        <input type="number" id="cantidadAlumnos" name="cantidadAlumnos" placeholder="Cantidad de alumnos" required />
+        <button type="button" id="btnAgregar" onclick="agregarMateria()">Agregar Materia</button><br><br>
+        <button type="button" id="btnActualizar" style="display: none;" onclick="actualizarMateria()">Actualizar Materia</button><br><br>
+        <button type="button" id="btnCancelar" style="display: none;" onclick="cancelarEdicion()">Cancelar</button><br><br>
     </form>
     
     <h2>Materias</h2>
     <ul id="materiasList"></ul>
 
     <script>
-        const apiUrl = 'http://localhost:3000/materias';
-        
-        // Función para cargar las materias
+        const apiUrl = 'http://localhost:5500';  //cambiamos luego por dire de api
+    
+        // Function to load the subjects from the API
         function loadMaterias() {
             fetch(apiUrl)
                 .then(response => response.json())
                 .then(data => {
                     const list = document.getElementById('materiasList');
-                    list.innerHTML = ''; // Limpiar la lista
+                    list.innerHTML = '';  // Clear the list
+    
+                    // Iterate over the subjects (data) and display each one with Edit/Delete buttons
                     data.forEach(materia => {
                         const li = document.createElement('li');
-                        li.textContent = `${materia.nombre} (Valor: ${materia.valor})`;
+                        li.textContent = `${materia.nombre} (Cantidad de Alumnos: ${materia.valor})`;
                         li.setAttribute('data-id', materia.id);
-
-                        // Botón para editar
+    
+                        // Create Edit button
                         const editButton = document.createElement('button');
                         editButton.textContent = 'Editar';
                         editButton.onclick = () => editMateria(materia.id, materia.nombre, materia.valor);
                         li.appendChild(editButton);
-
-                        // Botón para eliminar
+    
+                        // Create Delete button
                         const deleteButton = document.createElement('button');
                         deleteButton.textContent = 'Eliminar';
                         deleteButton.onclick = () => deleteMateria(materia.id);
                         li.appendChild(deleteButton);
-
+    
                         list.appendChild(li);
                     });
                 })
                 .catch(error => console.error('Error al cargar las materias:', error));
         }
-
-        // Función para agregar materia
+    
+        // Function to add a new subject
         document.getElementById('btnAgregar').onclick = function() {
-            const nombre = document.getElementById('nombre').value;
-            const valor = document.getElementById('valor').value;
-
+            const nombre = document.getElementById('materia').value;
+            const valor = document.getElementById('cantidadAlumnos').value;
+    
             fetch(apiUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nombre, valor })
-            }).then(() => {
+            })
+            .then(() => {
                 loadMaterias();
                 clearForm();
-            }).catch(error => console.error('Error al agregar la materia:', error));
+            })
+            .catch(error => console.error('Error al agregar la materia:', error));
         };
-
-        // Función para actualizar materia
+    
+        // Function to update an existing subject
         document.getElementById('btnActualizar').onclick = function() {
             const id = document.getElementById('materiaId').value;
-            const nombre = document.getElementById('nombre').value;
-            const valor = document.getElementById('valor').value;
-
+            const nombre = document.getElementById('materia').value;
+            const valor = document.getElementById('cantidadAlumnos').value;
+    
             fetch(`${apiUrl}/${id}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nombre, valor })
-            }).then(() => {
+            })
+            .then(() => {
                 loadMaterias();
                 clearForm();
-                document.getElementById('btnActualizar').style.display = 'none'; // Ocultar botón de actualizar
-                document.getElementById('btnAgregar').style.display = 'inline'; // Mostrar botón de agregar
-            }).catch(error => console.error('Error al actualizar la materia:', error));
+                document.getElementById('btnActualizar').style.display = 'none';  // Hide update button
+                document.getElementById('btnAgregar').style.display = 'inline';  // Show add button
+            })
+            .catch(error => console.error('Error al actualizar la materia:', error));
         };
-
-        // Función para editar materia
+    
+        // Function to set the form with the selected subject data for editing
         function editMateria(id, nombre, valor) {
             document.getElementById('materiaId').value = id;
-            document.getElementById('nombre').value = nombre;
-            document.getElementById('valor').value = valor;
-            document.getElementById('btnActualizar').style.display = 'inline'; // Mostrar botón de actualizar
-            document.getElementById('btnAgregar').style.display = 'none'; // Ocultar botón de agregar
-            document.getElementById('btnEliminar').style.display = 'inline'; // Mostrar botón de eliminar
+            document.getElementById('materia').value = nombre;
+            document.getElementById('cantidadAlumnos').value = valor;
+            document.getElementById('btnActualizar').style.display = 'inline';  // Show update button
+            document.getElementById('btnAgregar').style.display = 'none';  // Hide add button
+            document.getElementById('btnEliminar').style.display = 'inline';  // Show delete button
         }
-        // Función para eliminar materia
-        function deleteMateria() {
-            const id = document.getElementById('materiaId').value; // Obtener ID de la materia a eliminar
+    
+        // Function to delete a subject
+        function deleteMateria(id) {
             fetch(`${apiUrl}/${id}`, {
                 method: 'DELETE'
-            }).then(() => {
+            })
+            .then(() => {
                 loadMaterias();
                 clearForm();
-                document.getElementById('btnActualizar').style.display = 'none'; // Ocultar botón de actualizar
-                document.getElementById('btnAgregar').style.display = 'inline'; // Mostrar botón de agregar
-                document.getElementById('btnEliminar').style.display = 'none'; // Ocultar botón de eliminar
-            }).catch(error => console.error('Error al eliminar la materia:', error));
+                document.getElementById('btnActualizar').style.display = 'none';  // Hide update button
+                document.getElementById('btnAgregar').style.display = 'inline';  // Show add button
+            })
+            .catch(error => console.error('Error al eliminar la materia:', error));
         }
-        // Limpiar el formulario
+    
+        // Clear the form fields
         function clearForm() {
             document.getElementById('materiaId').value = '';
-            document.getElementById('nombre').value = '';
-            document.getElementById('valor').value = '';
+            document.getElementById('materia').value = '';
+            document.getElementById('cantidadAlumnos').value = '';
         }
-
-        // Cargar las materias al inicio
+    
+        // Load the subjects when the page is loaded
         loadMaterias();
     </script>
+    
 </body>
 </html>
