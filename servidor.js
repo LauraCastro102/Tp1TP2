@@ -12,6 +12,9 @@ if (!fs.existsSync(dataFilePath)) {
     fs.writeFileSync(dataFilePath, JSON.stringify([]));
 }
 
+
+
+
 const servidor = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url, true);
     let records = JSON.parse(fs.readFileSync(dataFilePath)); // Leer todos los registros al inicio

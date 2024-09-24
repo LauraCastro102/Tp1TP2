@@ -54,7 +54,7 @@
                 .catch(error => console.error('Error al cargar las materias:', error));
         }
     
-        // Function to add a new subject
+        // Funcion para cargar una materia nueva
         document.getElementById('btnAgregar').onclick = function() {
             const nombre = document.getElementById('materia').value;
             const valor = document.getElementById('cantidadAlumnos').value;
@@ -71,7 +71,7 @@
             .catch(error => console.error('Error al agregar la materia:', error));
         };
     
-        // Function to update an existing subject
+        // para actualizar una materia que ya existe
         document.getElementById('btnActualizar').onclick = function() {
             const id = document.getElementById('materiaId').value;
             const nombre = document.getElementById('materia').value;
@@ -85,13 +85,13 @@
             .then(() => {
                 loadMaterias();
                 clearForm();
-                document.getElementById('btnActualizar').style.display = 'none';  // Hide update button
-                document.getElementById('btnAgregar').style.display = 'inline';  // Show add button
+                document.getElementById('btnActualizar').style.display = 'none';  //esconde boton   
+                document.getElementById('btnAgregar').style.display = 'inline';  //muestra boton
             })
             .catch(error => console.error('Error al actualizar la materia:', error));
         };
     
-        // Function to set the form with the selected subject data for editing
+        /* funcion para editar
         function editMateria(id, nombre, valor) {
             document.getElementById('materiaId').value = id;
             document.getElementById('materia').value = nombre;
@@ -99,9 +99,9 @@
             document.getElementById('btnActualizar').style.display = 'inline';  // Show update button
             document.getElementById('btnAgregar').style.display = 'none';  // Hide add button
             document.getElementById('btnEliminar').style.display = 'inline';  // Show delete button
-        }
+        }*/
     
-        // Function to delete a subject
+        // para borrar
         function deleteMateria(id) {
             fetch(`${apiUrl}/${id}`, {
                 method: 'DELETE'
@@ -109,20 +109,20 @@
             .then(() => {
                 loadMaterias();
                 clearForm();
-                document.getElementById('btnActualizar').style.display = 'none';  // Hide update button
-                document.getElementById('btnAgregar').style.display = 'inline';  // Show add button
+                document.getElementById('btnActualizar').style.display = 'none';  
+                document.getElementById('btnAgregar').style.display = 'inline';  
             })
             .catch(error => console.error('Error al eliminar la materia:', error));
         }
     
-        // Clear the form fields
+        // borra campos
         function clearForm() {
             document.getElementById('materiaId').value = '';
             document.getElementById('materia').value = '';
             document.getElementById('cantidadAlumnos').value = '';
         }
     
-        // Load the subjects when the page is loaded
+        // carga y muestra las materias
         loadMaterias();
     </script>
     
