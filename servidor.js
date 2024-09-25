@@ -1,99 +1,100 @@
-const http = require('http');
-const url = require('url');
-const fs = require('fs'); //FileSystem
-const path = require('path');//agrego el path porque no me tomaba 
-//configurado para manejar las solic del html
 
-// para almacenar las materias
-const dataFilePath = 'data.json';
-
-// controla si el archivo existe y esta vacio al comenzar
-if (!fs.existsSync(dataFilePath)) {
-    fs.writeFileSync(dataFilePath, JSON.stringify([]));
-}
-
-
-
-
-const servidor = http.createServer((req, res) => {
-    const parsedUrl = url.parse(req.url, true);
-    let records = JSON.parse(fs.readFileSync(dataFilePath)); // Leer todos los registros al inicio
-
-    res.setHeader('Content-Type', 'application/json');//devuelve el contenido tipo json
-
-    // manipulacion de HTTP
-    if (req.method === "GET" && parsedUrl.pathname === "/") {
-        res.writeHead(200);
-        //res.end("Bienvenido a la API de Materias");
-         // busca el index cuando la ruta es la ruta es "/"
-        res.setHeader('Content-Type', 'text/html'); 
-        fs.readFile(path.join(__dirname, 'index.html'), (err, data) => {
-            if (err) {
-                res.writeHead(500);
-                res.end('Error al leer el archivo HTML.');
-            } else {
-                res.writeHead(200);
-                res.end(data);
-            }
-        });
-        }else if (req.method === "GET" && parsedUrl.pathname === "/materias") {
-           
-            res.writeHead(200); // aca trae todos los registros
-            res.end(JSON.stringify(records));  
-    } else if (req.method === "POST" && parsedUrl.pathname === "/materias") {
-        // cargar nuevo registro
-        let body = ''; //
-        req.on('data', chunk => { //aca recibe el bloque de datos
-            body += chunk.toString(); // acumula los datos y los pasa a string 
-        });
-        req.on('end', () => {
-            const newRecord = JSON.parse(body); // analiza el cuerpo de la solicitud (JSON)
-            newRecord.id = records.length + 1; // le da  un id  al nevo registro
-            records.push(newRecord);  //le agrega un registro al array "records"
-            fs.writeFileSync(dataFilePath, JSON.stringify(records)); // almacena los registros en el archivo JSON
-            res.writeHead(201);   // se manda código de estado 201 de que creo el registro
-            res.end(JSON.stringify(newRecord));  // del nuevo registro en la respuesta end
-        });
-    } else if (req.method === "PUT" && parsedUrl.pathname.match(/\/materias\/\d+/)) {
-        // en esta parte se actualia  un registro qur ya existe
-        const id = parsedUrl.pathname.split('/')[2]; // toma posicion 3 del array que es el id
-        let body = '';
-        req.on('data', chunk => {
-            body += chunk.toString();
-        });
-        req.on('end', () => {
-            const updatedRecord = JSON.parse(body);
-            const index = records.findIndex(r => r.id == id);//busca
+    
+    const url = require('url');
+    const http = require('http');
+    const fs = require('fs'); // FileSystem
+    const path = require('path'); // Agrego el path porque no me tomaba 
+    
+    // Archivo donde se almacenarán las materias
+    const dataFilePath = 'data.json';
+    
+   let materiasList=[];
+    
+    // Controla si el archivo existe y está vacío al comenzar
+    if (!fs.existsSync(dataFilePath)) {
+        fs.writeFileSync(dataFilePath, JSON.stringify([]));
+    }
+    
+    const servidor = http.createServer((req, res) => {
+        const parsedUrl = url.parse(req.url, true);
+        let records = JSON.parse(fs.readFileSync(dataFilePath)); // Leer todos los registros al inicio
+    
+        // Ruta raíz ("/"): Servir la página HTML
+        if (req.method === "GET" && parsedUrl.pathname === "/") {
+            fs.readFile(path.join(__dirname, 'index.html'), (err, data) => {
+                if (err) {
+                    res.writeHead(500, { 'Content-Type': 'text/plain' });
+                    res.end('Error al leer el archivo HTML.');
+                } else {
+                    res.writeHead(200, { 'Content-Type': 'text/html' });
+                    res.end(data);
+                }
+            });
+    
+        // Ruta para obtener todas las materias
+        } else if (req.method === "GET" && parsedUrl.pathname === "/materias") {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(records));
+    
+        // Ruta para agregar una nueva materia (POST)
+        } else if (req.method === "POST" && parsedUrl.pathname === "/materias") {
+            let body = ''; // Acumular los datos del cuerpo
+            req.on('data', chunk => {
+                body += chunk.toString(); // Convertir el chunk a string
+            });
+            req.on('end', () => {
+                const newRecord = JSON.parse(body); // Analizar el JSON recibido
+                newRecord.id = records.length + 1; // Asignar un nuevo ID
+                records.push(newRecord); // Agregar al array de registros
+                fs.writeFileSync(dataFilePath, JSON.stringify(records)); // Guardar en el archivo
+                res.writeHead(201, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(newRecord)); // Enviar el nuevo registro como respuesta
+            });
+    
+        // Ruta para actualizar una materia existente (PUT)
+        } else if (req.method === "PUT" && parsedUrl.pathname.match(/\/materias\/\d+/)) {
+            const id = parsedUrl.pathname.split('/')[2]; // Obtener el ID de la materia
+            let body = '';
+            req.on('data', chunk => {
+                body += chunk.toString();
+            });
+            req.on('end', () => {
+                const updatedRecord = JSON.parse(body);
+                const index = records.findIndex(r => r.id == id); // Buscar el registro por ID
+                if (index !== -1) {
+                    records[index] = { ...records[index], ...updatedRecord }; // Actualizar el registro
+                    fs.writeFileSync(dataFilePath, JSON.stringify(records)); // Guardar cambios
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify(records[index])); // Devolver el registro actualizado
+                } else {
+                    res.writeHead(404, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ message: "Registro no encontrado." }));
+                }
+            });
+    
+        // Ruta para eliminar una materia existente (DELETE)
+        } else if (req.method === "DELETE" && parsedUrl.pathname.match(/\/materias\/\d+/)) {
+            const id = parsedUrl.pathname.split('/')[2]; // Obtener el ID de la materia
+            const index = records.findIndex(r => r.id == id); // Buscar el registro por ID
             if (index !== -1) {
-                records[index] = { ...records[index], ...updatedRecord }; //acualiza
-                fs.writeFileSync(dataFilePath, JSON.stringify(records)); //graba
-                res.writeHead(200);
-                res.end(JSON.stringify(records[index])); //devuelve el registro que actualizo
+                records.splice(index, 1); // Eliminar el registro
+                fs.writeFileSync(dataFilePath, JSON.stringify(records)); // Guardar los cambios
+                res.writeHead(204); // Sin contenido, se eliminó exitosamente
+                res.end();
             } else {
-                res.writeHead(404);
+                res.writeHead(404, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ message: "Registro no encontrado." }));
             }
-        });
-    } else if (req.method === "DELETE" && parsedUrl.pathname.match(/\/materias\/\d+/)) { //nos aseguramos de estar en el path correcto
-        // borra un registro
-        const id = parsedUrl.pathname.split('/')[2]; //se pone el lugar para tomar el indice
-        const index = records.findIndex(r => r.id == id); //busca el id
-        if (index !== -1) { //encontro el registro
-            records.splice(index, 1); //elimina el registro del array
-            fs.writeFileSync(dataFilePath, JSON.stringify(records)); //graba sin el dato
-            res.writeHead(204); // avisa que se borro OK, pero no devuelve contenido en respuesta
-            res.end();
+    
+        // Si no coincide con ninguna ruta válida
         } else {
-            res.writeHead(404);
-            res.end(JSON.stringify({ message: "Registro no encontrado." }));
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: "Ruta no encontrada." }));
         }
-    } else {
-        res.writeHead(404);
-        res.end(JSON.stringify({ message: "Ruta no encontrada." }));
-    }
-});
-
-// Escuchar en el puerto 3000
-servidor.listen(5500, () => {
-    console.log('Servidor escuchando en http://localhost:5500');
-});
+    });
+    
+    // Escuchar en el puerto 3000
+    const PORT = 3000;
+    servidor.listen(PORT, () => {
+        console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    });
