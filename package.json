@@ -15,5 +15,13 @@
   "dependencies": {
     "express": "^4.21.0",
     "save-dev": "^0.0.1-security"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LauraCastro102/Tp1TP2.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LauraCastro102/Tp1TP2/issues"
+  },
+  "homepage": "https://github.com/LauraCastro102/Tp1TP2#readme"
 }

@@ -4,45 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administración de Materias</title>
-</head>
+    
 <body>
     <h1>Administración de Materias</h1>
     <form id="materiaForm" onsubmit="return false;">
         <input type="hidden" id="materiaId" />
         <input type="text" id="materia" name="materia" placeholder="Nombre de la materia" required />
         <input type="number" id="cantidadAlumnos" name="cantidadAlumnos" placeholder="Cantidad de alumnos" required />
-        <button type="button" id="btnAgregar" onclick="agregarMateria()">Agregar Materia</button><br><br>
-        <button type="button" id="btnActualizar" style="display: none;" onclick="actualizarMateria()">Actualizar Materia</button><br><br>
-        <button type="button" id="btnCancelar" style="display: none;" onclick="cancelarEdicion()">Cancelar</button><br><br>
+        <button type="button" id="btnAgregar" >Agregar Materia</button><br><br>
+        <button type="button" id="btnActualizar" style="display: none;" onclick="editMateria()">Actualizar Materia</button><br><br>
+        <button type="button" id="btnEliminar" style="display: none;" onclick="eliminarMateria()">Cancelar</button><br><br>
     </form>
     
     <h2>Materias</h2>
     <ul id="materiasList"></ul>
 
     <script>
-        const apiUrl = 'http://localhost:5500';  //cambiamos luego por dire de api
+        const apiUrl = 'http://localhost:3000';  //cambiamos luego por dire de api
     
-        // Function to load the subjects from the API
+        
+        
+        // Funcion para mostrar las materias
         function loadMaterias() {
             fetch(apiUrl)
                 .then(response => response.json())
                 .then(data => {
-                    const list = document.getElementById('materiasList');
-                    list.innerHTML = '';  // Clear the list
+                  const list = document.getElementById('materiasList');
+                  list.innerHTML = ''; //limpiar
     
-                    // Iterate over the subjects (data) and display each one with Edit/Delete buttons
+                    //mostrar las materias, cantidades y los botones
                     data.forEach(materia => {
                         const li = document.createElement('li');
                         li.textContent = `${materia.nombre} (Cantidad de Alumnos: ${materia.valor})`;
                         li.setAttribute('data-id', materia.id);
     
-                        // Create Edit button
+                        // boiton editar
                         const editButton = document.createElement('button');
                         editButton.textContent = 'Editar';
                         editButton.onclick = () => editMateria(materia.id, materia.nombre, materia.valor);
                         li.appendChild(editButton);
     
-                        // Create Delete button
+                        // boton borrar
                         const deleteButton = document.createElement('button');
                         deleteButton.textContent = 'Eliminar';
                         deleteButton.onclick = () => deleteMateria(materia.id);
@@ -51,14 +53,14 @@
                         list.appendChild(li);
                     });
                 })
-                .catch(error => console.error('Error al cargar las materias:', error));
+                .catch(error => console.log('Error al cargar las materias:', error));
         }
     
         // Funcion para cargar una materia nueva
         document.getElementById('btnAgregar').onclick = function() {
             const nombre = document.getElementById('materia').value;
-            const valor = document.getElementById('cantidadAlumnos').value;
-    
+            const valor = parseInt(document.getElementById('cantidadAlumnos').value);
+            //alert(nombre,valor);
             fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -91,15 +93,15 @@
             .catch(error => console.error('Error al actualizar la materia:', error));
         };
     
-        /* funcion para editar
+        //funcion para editar
         function editMateria(id, nombre, valor) {
             document.getElementById('materiaId').value = id;
             document.getElementById('materia').value = nombre;
             document.getElementById('cantidadAlumnos').value = valor;
-            document.getElementById('btnActualizar').style.display = 'inline';  // Show update button
-            document.getElementById('btnAgregar').style.display = 'none';  // Hide add button
-            document.getElementById('btnEliminar').style.display = 'inline';  // Show delete button
-        }*/
+            document.getElementById('btnActualizar').style.display = 'inline';  //muestra el boton
+            document.getElementById('btnAgregar').style.display = 'none';  //esconde el boton
+            document.getElementById('btnEliminar').style.display = 'inline';  // muestra el boton
+        }
     
         // para borrar
         function deleteMateria(id) {

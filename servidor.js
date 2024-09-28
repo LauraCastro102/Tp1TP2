@@ -20,7 +20,7 @@
         let records = JSON.parse(fs.readFileSync(dataFilePath)); // Leer todos los registros al inicio
     
         // Ruta raíz ("/"): Servir la página HTML
-        if (req.method === "GET" && parsedUrl.pathname === "/") {
+        if (req.method === "GET" && parsedUrl.pathname === "/materias") {
             fs.readFile(path.join(__dirname, 'index.html'), (err, data) => {
                 if (err) {
                     res.writeHead(500, { 'Content-Type': 'text/plain' });
@@ -32,7 +32,7 @@
             });
     
         // Ruta para obtener todas las materias
-        } else if (req.method === "GET" && parsedUrl.pathname === "/materias") {
+        } else if (req.method === "GET" && parsedUrl.pathname === "/") {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(records));
     
